@@ -18,3 +18,7 @@ This program requires some inputs to run, Please use your AOC inputs when runnin
 Format: `input-{day_num}.txt`
 
 Note: I pad my input names with 0's but it should work just fine with a single number.
+
+## References
+
+- [https://github.com/fspoettel/advent-of-code-rust](https://github.com/fspoettel/advent-of-code-rust) <- inspiration for project structure
