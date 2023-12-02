@@ -13,11 +13,10 @@ $ cargo test
 
 ## Advanced Setup
 
-This program requires some inputs to run, Please use your AOC inputs when running this program. Format then and place in the `/src/inputs` folder.
+This program requires some inputs to run, Please use your AOC inputs when running this program. Format then and place in the `/data/inputs` folder.
 
-Format: `input-{day_num}.txt`
+Format: `{day_num:02}.txt`
 
-Note: I pad my input names with 0's but it should work just fine with a single number.
 
 ## References
 
