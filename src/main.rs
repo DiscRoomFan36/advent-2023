@@ -1,15 +1,17 @@
-use inputs::{load_file, InputType};
+use inputs::InputType;
 
-mod day01;
+use crate::inputs::{get_file_part, get_file};
 mod inputs;
 
+mod day01;
+mod day02;
 
 fn main() {
     println!("Hello Advent");
 
-	let day_1_data_sample = load_file(1, InputType::Sample(1));
-	let day_1_data = load_file(1, InputType::Input);
+    day01::main(&get_file_part(1, InputType::Sample, 1));
+    day01::main(&get_file(1, InputType::Input));
 
-    day01::main(&day_1_data_sample);
-    day01::main(&day_1_data);
+    day02::main(&get_file(2, InputType::Sample));
+    day02::main(&get_file(2, InputType::Input));
 }

@@ -7,7 +7,7 @@ pub fn is_prefix(needle: &str, haystack: &str) -> bool {
     zip(needle.chars(), haystack.chars()).all(|(n, h)| n == h)
 }
 
-fn combine_first_and_last(line: &String, prefixes: &Vec<&str>) -> u32 {
+fn combine_first_and_last(line: &str, prefixes: &Vec<&str>) -> u32 {
     let mut first_digit = 0;
     let mut last_digit = 0;
 
@@ -36,33 +36,30 @@ const DIGITS_AS_WORDS: [&str; 9] = [
 ];
 const DIGITS: [&str; 9] = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
-fn accumulate(file: &Vec<String>, prefixes: &Vec<&str>) -> u32 {
-    file.iter().fold(0, |total, line| {
+fn accumulate(file: &String, prefixes: &Vec<&str>) -> u32 {
+    file.lines().fold(0, |total, line| {
         total + combine_first_and_last(line, &prefixes)
     })
 }
 
-pub fn solve_part_1(file: &Vec<String>) -> u32 {
-    accumulate(file, &DIGITS.into())
+pub fn solve_part_1(file: &String) -> Option<u32> {
+    Some(accumulate(file, &DIGITS.into()))
 }
 
-pub fn solve_part_2(file: &Vec<String>) -> u32 {
-    accumulate(file, &[&DIGITS[..], &DIGITS_AS_WORDS[..]].concat())
+pub fn solve_part_2(file: &String) -> Option<u32> {
+    Some(accumulate(file, &[&DIGITS[..], &DIGITS_AS_WORDS[..]].concat()))
 }
 
-pub fn main(file: &Vec<String>) {
+pub fn main(file: &String) {
     println!("Solving Day 1");
-    let answer = solve_part_1(&file);
-    println!("answer 1 is {answer}");
-    let answer = solve_part_2(&file);
-    println!("answer 2 is {answer}");
+    println!("  part 1: {:?}", solve_part_1(&file));
+    println!("  part 2: {:?}", solve_part_2(&file));
 }
-
 
 #[cfg(test)]
 mod tests {
-    use crate::inputs::{self, InputType};
     use super::*;
+    use crate::inputs::{self, InputType};
 
     #[test]
     fn prefix_function_works() {
@@ -73,13 +70,13 @@ mod tests {
 
     #[test]
     fn solves_first_problem() {
-        let content = inputs::load_file(1, InputType::Sample(1));
-        assert_eq!(solve_part_1(&content), 142)
+        let content = inputs::get_file_part(1, InputType::Sample, 1);
+        assert_eq!(solve_part_1(&content), Some(142))
     }
 
     #[test]
     fn solves_second_problem() {
-        let content = inputs::load_file(1, InputType::Sample(2));
-        assert_eq!(solve_part_2(&content), 281)
+        let content = inputs::get_file_part(1, InputType::Sample, 2);
+        assert_eq!(solve_part_2(&content), Some(281))
     }
 }
