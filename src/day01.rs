@@ -47,7 +47,8 @@ pub fn solve_part_1(file: &String) -> Option<u32> {
 }
 
 pub fn solve_part_2(file: &String) -> Option<u32> {
-    Some(accumulate(file, &[&DIGITS[..], &DIGITS_AS_WORDS[..]].concat()))
+    let prefixes = [&DIGITS[..], &DIGITS_AS_WORDS[..]].concat();
+    Some(accumulate(file, &prefixes))
 }
 
 pub fn main(file: &String) {

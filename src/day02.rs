@@ -58,13 +58,13 @@ mod tests {
 
     const DAY: u8 = 2;
 
-	#[test]
-	fn regex_captures_game_id() {
-		let input = "Game 100: 8 red, 2 blue, 1 green; 2 blue, 4 red, 2 green; 9 red, 1 green; 2 green, 2 red; 3 red, 5 blue; 5 blue, 8 red";
-		let re = Regex::new(GAME_ID_CAPTURE).unwrap();
-		let caps = re.captures(input).unwrap();
-		assert_eq!(caps["id"].parse::<u32>().unwrap(), 100);
-	}
+    #[test]
+    fn regex_captures_game_id() {
+        let input = "Game 100: 8 red, 2 blue, 1 green; 2 blue, 4 red, 2 green; 9 red, 1 green; 2 green, 2 red; 3 red, 5 blue; 5 blue, 8 red";
+        let re = Regex::new(GAME_ID_CAPTURE).unwrap();
+        let caps = re.captures(input).unwrap();
+        assert_eq!(caps["id"].parse::<u32>().unwrap(), 100);
+    }
 
     #[test]
     fn solves_part_1() {

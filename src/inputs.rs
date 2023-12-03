@@ -32,4 +32,3 @@ fn _main() {
     println!("content: {:?}", get_file_part(1, InputType::Sample, 1));
     println!("content: {:?}", get_file_part(1, InputType::Sample, 2));
 }
-

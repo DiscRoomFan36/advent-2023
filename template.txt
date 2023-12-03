@@ -1,9 +1,9 @@
 pub fn solve_part_1(_file: &String) -> Option<u32> {
-	None
+    None
 }
 
 pub fn solve_part_2(_file: &String) -> Option<u32> {
-	None
+    None
 }
 
 const DAY: u8 = -1;

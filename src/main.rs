@@ -1,4 +1,4 @@
-use inputs::{InputType, get_file};
+use inputs::{get_file, InputType};
 mod inputs;
 
 mod day01;
