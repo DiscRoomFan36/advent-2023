@@ -69,13 +69,13 @@ mod tests {
     }
 
     #[test]
-    fn solves_first_problem() {
+    fn solves_part_1() {
         let content = inputs::get_file_part(1, InputType::Sample, 1);
         assert_eq!(solve_part_1(&content), Some(142))
     }
 
     #[test]
-    fn solves_second_problem() {
+    fn solves_part_2() {
         let content = inputs::get_file_part(1, InputType::Sample, 2);
         assert_eq!(solve_part_2(&content), Some(281))
     }

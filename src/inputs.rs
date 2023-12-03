@@ -1,5 +1,6 @@
 use std::fs;
 
+#[allow(unused)]
 #[derive(Debug, PartialEq)]
 pub enum InputType {
     Sample,
@@ -20,6 +21,7 @@ pub fn get_file(day: u8, input_type: InputType) -> String {
     fs::read_to_string(format!("./data/{folder}/{day:02}.txt")).expect("File dose not exist")
 }
 
+#[allow(unused)]
 pub fn get_file_part(day: u8, input_type: InputType, part: u8) -> String {
     let folder = input_type.folder_path();
     fs::read_to_string(format!("./data/{folder}/{day:02}-{part}.txt")).expect("File dose not exist")

@@ -67,13 +67,13 @@ mod tests {
 	}
 
     #[test]
-    fn solves_first_problem() {
+    fn solves_part_1() {
         let content = inputs::get_file(DAY, InputType::Sample);
         assert_eq!(solve_part_1(&content), Some(8))
     }
 
     #[test]
-    fn solves_second_problem() {
+    fn solves_part_2() {
         let content = inputs::get_file(DAY, InputType::Sample);
         assert_eq!(solve_part_2(&content), Some(2286))
     }
