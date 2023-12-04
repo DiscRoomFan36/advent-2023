@@ -36,22 +36,22 @@ const DIGITS_AS_WORDS: [&str; 9] = [
 ];
 const DIGITS: [&str; 9] = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
-fn accumulate(file: &String, prefixes: &Vec<&str>) -> u32 {
+fn accumulate(file: &str, prefixes: &Vec<&str>) -> u32 {
     file.lines().fold(0, |total, line| {
         total + combine_first_and_last(line, &prefixes)
     })
 }
 
-pub fn solve_part_1(file: &String) -> Option<u32> {
+pub fn solve_part_1(file: &str) -> Option<u32> {
     Some(accumulate(file, &DIGITS.into()))
 }
 
-pub fn solve_part_2(file: &String) -> Option<u32> {
+pub fn solve_part_2(file: &str) -> Option<u32> {
     let prefixes = [&DIGITS[..], &DIGITS_AS_WORDS[..]].concat();
     Some(accumulate(file, &prefixes))
 }
 
-pub fn main(file: &String) {
+pub fn main(file: &str) {
     println!("Solving Day 1");
     println!("  part 1: {:?}", solve_part_1(&file));
     println!("  part 2: {:?}", solve_part_2(&file));

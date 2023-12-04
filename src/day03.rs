@@ -1,6 +1,6 @@
 use std::{char, cmp::min, usize};
 
-fn to_grid(file: &String) -> Vec<Vec<u8>> {
+fn to_grid(file: &str) -> Vec<Vec<u8>> {
     file.lines().map(|line| line.as_bytes().into()).collect()
 }
 
@@ -22,9 +22,7 @@ fn is_gear(c: u8) -> bool {
 // takes a pos with a number and finds the start and end to construct a number
 fn to_number(grid: &Vec<Vec<u8>>, pos: (usize, usize)) -> u32 {
     let (x, y) = pos;
-
     assert!(grid[y][x].is_ascii_digit());
-
     let start_x = (0..=x)
         .rev()
         .take_while(|x| grid[y][*x].is_ascii_digit())
@@ -54,7 +52,7 @@ fn surrounding_numbers(grid: &Vec<Vec<u8>>, pos: (usize, usize)) -> Vec<u32> {
     numbers
 }
 
-pub fn solve_part_1(file: &String) -> Option<u32> {
+pub fn solve_part_1(file: &str) -> Option<u32> {
     let mut total = 0;
     let grid = to_grid(file);
     // its a square
@@ -70,7 +68,7 @@ pub fn solve_part_1(file: &String) -> Option<u32> {
     Some(total)
 }
 
-pub fn solve_part_2(file: &String) -> Option<u32> {
+pub fn solve_part_2(file: &str) -> Option<u32> {
     let mut total = 0;
     let grid = to_grid(file);
     // its a square
@@ -91,7 +89,7 @@ pub fn solve_part_2(file: &String) -> Option<u32> {
 
 const DAY: u8 = 3;
 
-pub fn main(file: &String) {
+pub fn main(file: &str) {
     println!("Solving Day {}", DAY);
     println!("  part 1: {:?}", solve_part_1(&file));
     println!("  part 2: {:?}", solve_part_2(&file));

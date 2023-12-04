@@ -27,7 +27,7 @@ fn smallest_hands(hand: &str) -> [u32; 3] {
         })
 }
 
-pub fn solve_part_1(file: &String) -> Option<u32> {
+pub fn solve_part_1(file: &str) -> Option<u32> {
     const MAX_HANDS: [u32; 3] = [12, 13, 14];
     Some(file.lines().fold(0, |z, line: &str| {
         let hand = smallest_hands(&line);
@@ -39,13 +39,13 @@ pub fn solve_part_1(file: &String) -> Option<u32> {
     }))
 }
 
-pub fn solve_part_2(file: &String) -> Option<u32> {
+pub fn solve_part_2(file: &str) -> Option<u32> {
     Some(file.lines().fold(0, |z, line| {
         z + smallest_hands(&line).iter().fold(1, |z, u| z * u)
     }))
 }
 
-pub fn main(file: &String) {
+pub fn main(file: &str) {
     println!("Solving Day 2");
     println!("  part 1: {:?}", solve_part_1(&file));
     println!("  part 2: {:?}", solve_part_2(&file));

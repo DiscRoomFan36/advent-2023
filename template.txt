@@ -22,7 +22,7 @@ mod tests {
     #[test]
     fn solves_first_problem() {
         let content = inputs::get_file(DAY, InputType::Sample);
-        assert_eq!(solve_part_1(&content), Some(4361))
+        assert_eq!(solve_part_1(&content), None)
     }
 
     #[test]

@@ -4,6 +4,7 @@ mod inputs;
 mod day01;
 mod day02;
 mod day03;
+mod day04;
 
 fn main() {
     println!("Hello Advent");
@@ -13,4 +14,6 @@ fn main() {
     day02::main(&get_file(2, InputType::Input));
 
     day03::main(&get_file(3, InputType::Input));
+    
+    day04::main(&get_file(4, InputType::Input));
 }
