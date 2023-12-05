@@ -5,27 +5,34 @@ const REGEX: &str = r"(\d+( |$))|(\|)";
 
 fn card_matching(line: &str) -> u32 {
     static RE: Lazy<Regex> = Lazy::new(|| Regex::new(REGEX).unwrap());
-    let caps: Vec<u32> = RE.find_iter(line).map(|m| m.as_str().trim_end().parse().unwrap_or(0)).collect();
+    let caps: Vec<u32> = RE
+        .find_iter(line)
+        .map(|m| m.as_str().trim_end().parse().unwrap_or(0))
+        .collect();
 
-    let separator = caps.iter().position(|&x| x == 0).expect("0 element in array");
-    let (winning, numbers) = (&caps[..separator], &caps[separator+1..]);
+    let separator = caps
+        .iter()
+        .position(|&x| x == 0)
+        .expect("0 element in array");
+    let (winning, numbers) = (&caps[..separator], &caps[separator + 1..]);
 
-    numbers.iter().fold(0, |z, x| {
-        z + if winning.contains(x) { 1 } else { 0 }
-    })
+    numbers
+        .iter()
+        .fold(0, |z, x| z + if winning.contains(x) { 1 } else { 0 })
 }
 
 pub fn solve_part_1(file: &str) -> Option<u32> {
-    Some(file.lines().fold(0, |z, line| {
-        z + (2 as u32).pow(card_matching(line)) / 2
-    }))
+    Some(
+        file.lines()
+            .fold(0, |z, line| z + (2 as u32).pow(card_matching(line)) / 2),
+    )
 }
 
 pub fn solve_part_2(file: &str) -> Option<u32> {
     let scores: Vec<u32> = file.lines().map(|line| card_matching(line)).collect();
     let mut counts = vec![1; scores.len()];
     for (i, score) in scores.iter().enumerate() {
-        for j in i+1..i+1+*score as usize {
+        for j in i + 1..i + 1 + *score as usize {
             counts[j] = counts[j] + counts[i]
         }
     }

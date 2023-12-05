@@ -3,4 +3,4 @@
 .vscode
 
 # dont steal my inputs
-/data/inputs/*
+/data/inputs/*.txt
