@@ -1,7 +1,7 @@
-use std::ops::Range;
-
 use once_cell::sync::Lazy;
 use regex::Regex;
+
+use std::ops::Range;
 
 const REGEX: &str = r"(\d+)";
 fn line_to_digits(line: &str) -> Vec<u64> {
@@ -17,7 +17,7 @@ enum RangeOverlap {
     None,
 }
 impl RangeOverlap {
-    fn overlap<T: std::cmp::PartialOrd>(r1:&Range<T>, r2:&Range<T>) -> Self {
+    fn overlap<T: std::cmp::PartialOrd>(r1: &Range<T>, r2: &Range<T>) -> Self {
         if r1.start <= r2.start && r2.end <= r1.end {
             RangeOverlap::Full
         } else if r2.end <= r1.start || r1.end <= r2.start {
@@ -36,7 +36,7 @@ struct Mapping {
 }
 impl Mapping {
     fn to_range(self) -> SeedRange {
-        self.src .. self.src+self.dist
+        self.src..self.src + self.dist
     }
     fn start_and_end(self) -> (u64, u64) {
         (self.src, self.src + self.dist)
@@ -47,15 +47,16 @@ impl Mapping {
         let (start, end) = (range.start, range.end);
         let (m_start, _) = self.start_and_end();
         match RangeOverlap::overlap(&self.to_range(), range) {
-            RangeOverlap::Full =>
-                (start-m_start)+self.dest .. (end-m_start)+self.dest,
+            RangeOverlap::Full => (start - m_start) + self.dest..(end - m_start) + self.dest,
             RangeOverlap::None => start..end,
             RangeOverlap::Partial => panic!(),
         }
     }
 }
 
-struct Map{ mappings: Vec<Mapping> }
+struct Map {
+    mappings: Vec<Mapping>,
+}
 
 type SeedRange = Range<u64>;
 
@@ -74,16 +75,21 @@ impl Map {
             .map(|m| m.to_vec())
             .collect();
 
-        maps.iter().map(|map| {
-            Map {
-                mappings: map.iter().map(|mapping| {
-                    Mapping { src: mapping[1], dest: mapping[0], dist: mapping[2] }
-                }).collect()
-            }
-        }).collect()
+        maps.iter()
+            .map(|map| Map {
+                mappings: map
+                    .iter()
+                    .map(|mapping| Mapping {
+                        src: mapping[1],
+                        dest: mapping[0],
+                        dist: mapping[2],
+                    })
+                    .collect(),
+            })
+            .collect()
     }
 
-    fn map_seeds_over_self(&self, seeds: SeedRange) -> SeedRange{
+    fn map_seeds_over_self(&self, seeds: SeedRange) -> SeedRange {
         for mapping in &self.mappings {
             match RangeOverlap::overlap(&mapping.to_range(), &seeds) {
                 RangeOverlap::Full => return mapping.map_range(&seeds),
@@ -104,7 +110,11 @@ impl Map {
         } else if end <= m_start {
             return vec![start..end];
         } else if start < m_start {
-            return [vec![start..m_start], Map::shatter_map(mapping, &(m_start..end))].concat();
+            return [
+                vec![start..m_start],
+                Map::shatter_map(mapping, &(m_start..end)),
+            ]
+            .concat();
         } else if m_end < end {
             return [Map::shatter_map(mapping, &(start..m_end)), vec![m_end..end]].concat();
         } else {
@@ -116,48 +126,63 @@ impl Map {
         let (start, end) = (range.start, range.end);
 
         let shattered: Seeds = self.mappings.iter().fold(vec![start..end], |z, mapping| {
-            z.iter().flat_map(|r| {
-                Map::shatter_map(mapping, r)
-            }).collect()
+            z.iter()
+                .flat_map(|r| Map::shatter_map(mapping, r))
+                .collect()
         });
 
-        shattered.iter().map(|range| self.map_seeds_over_self(range.clone())).collect()
+        shattered
+            .iter()
+            .map(|range| self.map_seeds_over_self(range.clone()))
+            .collect()
     }
 
     fn transform_seeds(&self, ranges: &Seeds) -> Seeds {
-        ranges.iter().flat_map(|range| self.shatter_and_map_over_self(range)).collect()
+        ranges
+            .iter()
+            .flat_map(|range| self.shatter_and_map_over_self(range))
+            .collect()
     }
 }
-
 
 pub fn solve_part_1(file: &str) -> Option<u64> {
     let lines: Vec<Vec<u64>> = file.lines().map(|line| line_to_digits(line)).collect();
 
     let (seeds, lines) = (lines[0..1][0].clone(), &lines[3..]);
     let maps = Map::new_maps(lines);
-    
-    let seeds: Seeds = seeds.iter().map(|seed| (*seed..(*seed+1))).collect();
 
-    let seeds = maps.iter().fold(seeds, |z, u| {
-        u.transform_seeds(&z)
-    });
+    let seeds: Seeds = seeds.iter().map(|seed| (*seed..(*seed + 1))).collect();
 
-    Some(seeds.iter().min_by(|x, y| x.start.cmp(&y.start)).unwrap().start)
+    let seeds = maps.iter().fold(seeds, |z, u| u.transform_seeds(&z));
 
+    Some(
+        seeds
+            .iter()
+            .min_by(|x, y| x.start.cmp(&y.start))
+            .unwrap()
+            .start,
+    )
 }
 
 pub fn solve_part_2(file: &str) -> Option<u64> {
     let lines: Vec<Vec<u64>> = file.lines().map(|line| line_to_digits(line)).collect();
 
     let (seeds, lines) = (lines[0..1][0].clone(), &lines[3..]);
-    let seeds: Seeds = seeds.chunks_exact(2).map(|chunk| (chunk[0]..chunk[0]+chunk[1])).collect();
+    let seeds: Seeds = seeds
+        .chunks_exact(2)
+        .map(|chunk| (chunk[0]..chunk[0] + chunk[1]))
+        .collect();
     let maps = Map::new_maps(lines);
 
-    let seeds = maps.iter().fold(seeds, |z, u| {
-        u.transform_seeds(&z)
-    });
+    let seeds = maps.iter().fold(seeds, |z, u| u.transform_seeds(&z));
 
-    Some(seeds.iter().min_by(|x, y| x.start.cmp(&y.start)).unwrap().start)
+    Some(
+        seeds
+            .iter()
+            .min_by(|x, y| x.start.cmp(&y.start))
+            .unwrap()
+            .start,
+    )
 }
 
 const DAY: u8 = 5;
@@ -175,14 +200,21 @@ mod tests {
 
     #[test]
     fn shatter_map_test() {
-        let mapping = Mapping{ src: 3, dest: 9, dist: 2 };
+        let mapping = Mapping {
+            src: 3,
+            dest: 9,
+            dist: 2,
+        };
 
         assert_eq!(Map::shatter_map(&mapping, &(1..3)), vec![1..3]);
         assert_eq!(Map::shatter_map(&mapping, &(1..4)), vec![1..3, 3..4]);
         assert_eq!(Map::shatter_map(&mapping, &(3..5)), vec![3..5]);
         assert_eq!(Map::shatter_map(&mapping, &(4..6)), vec![4..5, 5..6]);
         assert_eq!(Map::shatter_map(&mapping, &(5..7)), vec![5..7]);
-        assert_eq!(Map::shatter_map(&mapping, &(2..6)), vec![(2..3), (3..5), (5..6)]);
+        assert_eq!(
+            Map::shatter_map(&mapping, &(2..6)),
+            vec![(2..3), (3..5), (5..6)]
+        );
     }
 
     #[test]
