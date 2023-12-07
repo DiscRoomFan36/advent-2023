@@ -18,47 +18,62 @@ fn pressed_to_distance(total_time: IntType, pressed: IntType) -> IntType {
 }
 
 fn how_many_ways(time: IntType, dist: IntType) -> IntType {
-	let (mut low, mut high) = (0, time/2);
-	while low != high {
-		let mid = low + (high - low) / 2; // (low + high) / 2; // Or a fancy way to avoid int overflow
-		if pressed_to_distance(time, mid) < dist {
-			low = mid + 1;
-		} else {
-			high = mid;
-		}
-	}
-	let smallest = low;
+    let (mut low, mut high) = (0, time / 2);
+    while low != high {
+        let mid = low + (high - low) / 2;
+        if pressed_to_distance(time, mid) < dist {
+            low = mid + 1;
+        } else {
+            high = mid;
+        }
+    }
+    let smallest = low;
 
+    let (mut low, mut high) = (time / 2, time);
+    while low != high {
+        let mid = low + (high - low) / 2;
+        if pressed_to_distance(time, mid) >= dist {
+            low = mid + 1;
+        } else {
+            high = mid;
+        }
+    }
+    let largest = low - 1;
 
-	let (mut low, mut high) = (time/2, time);
-	while low != high {
-		let mid = low + (high - low) / 2; // (low + high) / 2; // Or a fancy way to avoid int overflow
-		if pressed_to_distance(time, mid) >= dist {
-			low = mid + 1;
-		} else {
-			high = mid;
-		}
-	}
-	let largest = low - 1;
+    let smallest = if pressed_to_distance(time, smallest) > dist {
+        smallest
+    } else {
+        smallest + 1
+    };
+    let largest = if pressed_to_distance(time, largest) > dist {
+        largest
+    } else {
+        largest - 1
+    };
 
-	let smallest = if pressed_to_distance(time, smallest) > dist { smallest } else { smallest + 1 };
-	let largest = if pressed_to_distance(time, largest) > dist { largest } else { largest - 1 };
-
-	largest - smallest + 1
+    largest - smallest + 1
 }
 
 pub fn solve_part_1(file: &String) -> Option<IntType> {
-	let inputs: Vec<Vec<IntType>> = file.lines().map(|line| line_to_digits(line)).collect();
-	let (times, distances) = (inputs[0].clone(), inputs[1].clone());
+    let inputs: Vec<Vec<IntType>> = file.lines().map(|line| line_to_digits(line)).collect();
+    let (times, distances) = (inputs[0].clone(), inputs[1].clone());
 
-	Some(zip(times, distances).fold(1, |z, (time, dist)| {
-		z * how_many_ways(time, dist)
-	}))
+    Some(zip(times, distances).fold(1, |z, (time, dist)| z * how_many_ways(time, dist)))
 }
 
 pub fn solve_part_2(file: &String) -> Option<IntType> {
-	let inputs: Vec<IntType> = file.lines().map(|line| line.split_once(":").unwrap().1.replace(" ", "").parse().unwrap()).collect();
-	let (time, dist) = (inputs[0], inputs[1]);
+    let inputs: Vec<IntType> = file
+        .lines()
+        .map(|line| {
+            line.split_once(":")
+                .unwrap()
+                .1
+                .replace(" ", "")
+                .parse()
+                .unwrap()
+        })
+        .collect();
+    let (time, dist) = (inputs[0], inputs[1]);
     Some(how_many_ways(time, dist))
 }
 
