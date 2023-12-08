@@ -4,45 +4,43 @@ use std::iter::zip;
 use once_cell::sync::Lazy;
 use regex::Regex;
 
-type IntType = u64;
-
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Debug, Hash)]
 enum CardType {
-    Ace = 14,
-    King = 13,
-    Queen = 12,
-    Jack = 11,
-    Ten = 10,
-    Nine = 9,
-    Eight = 8,
-    Seven = 7,
-    Six = 6,
-    Five = 5,
-    Four = 4,
-    Three = 2,
-    Two = 1,
-    Joker = 0,
+    Joker,
+    Two,
+    Three,
+    Four,
+    Five,
+    Six,
+    Seven,
+    Eight,
+    Nine,
+    Ten,
+    Jack,
+    Queen,
+    King,
+    Ace,
 }
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Debug, Hash)]
 enum HandType {
-    FiveOfAKind = 7,
-    FourOfAKind = 6,
-    FullHouse = 5,
-    ThreeOfAKind = 4,
-    TwoPair = 3,
-    OnePair = 2,
-    HighCard = 1,
+    HighCard,
+    OnePair,
+    TwoPair,
+    ThreeOfAKind,
+    FullHouse,
+    FourOfAKind,
+    FiveOfAKind,
 }
 
 #[derive(Clone, Copy, Debug, Eq, Ord)]
 struct Hand {
     cards: [CardType; 5],
-    bet: IntType,
+    bet: u32,
     hand_type: HandType,
 }
 impl Hand {
-    fn new(hand: &str, bet: IntType, use_joker: bool) -> Self {
+    fn new(hand: &str, bet: &str, use_joker: bool) -> Self {
         assert!(hand.len() == 5);
         let cards: Vec<CardType> = hand
             .chars()
@@ -72,7 +70,7 @@ impl Hand {
 
         Hand {
             cards: card_array,
-            bet,
+            bet: bet.parse().unwrap(),
             hand_type: Hand::get_hand_type(card_array),
         }
     }
@@ -84,7 +82,7 @@ impl Hand {
             .map(|line| {
                 let x = RE.captures(line).unwrap();
                 let (_, [hand, bet]) = x.extract();
-                Hand::new(hand, bet.parse().unwrap(), use_joker)
+                Hand::new(hand, bet, use_joker)
             })
             .collect()
     }
@@ -174,25 +172,25 @@ impl PartialOrd for Hand {
     }
 }
 
-pub fn solve_part_1(file: &str) -> Option<IntType> {
+pub fn solve_part_1(file: &str) -> Option<u32> {
     let mut hands = Hand::new_hands(file, false);
     hands.sort();
     Some(
         hands
             .iter()
             .enumerate()
-            .fold(0, |z, (i, hand)| z + (hand.bet * (i as IntType + 1))),
+            .fold(0, |z, (i, hand)| z + (hand.bet * (i as u32 + 1))),
     )
 }
 
-pub fn solve_part_2(file: &str) -> Option<IntType> {
+pub fn solve_part_2(file: &str) -> Option<u32> {
     let mut hands = Hand::new_hands(file, true);
     hands.sort();
     Some(
         hands
             .iter()
             .enumerate()
-            .fold(0, |z, (i, hand)| z + (hand.bet * (i as IntType + 1))),
+            .fold(0, |z, (i, hand)| z + (hand.bet * (i as u32 + 1))),
     )
 }
 
