@@ -29,9 +29,7 @@ impl NodeIdent {
     fn at_exit(&self, full_exit: bool) -> bool {
         match full_exit {
             true => self.ident == *b"ZZZ",
-            false => {
-                self.ident[2] == b'Z'
-            }
+            false => self.ident[2] == b'Z',
         }
     }
     fn next_node(node: &Self, node_map: &HashMap<Self, (Self, Self)>, turn: u8) -> Self {
@@ -44,7 +42,12 @@ impl NodeIdent {
     }
 }
 
-fn dist_to_next_exit(node: &NodeIdent, node_map: &HashMap<NodeIdent, (NodeIdent, NodeIdent)>, instructions: &[u8], full_exit: bool) -> u64 {
+fn dist_to_next_exit(
+    node: &NodeIdent,
+    node_map: &HashMap<NodeIdent, (NodeIdent, NodeIdent)>,
+    instructions: &[u8],
+    full_exit: bool,
+) -> u64 {
     let mut cur = *node;
     let mut count = 0;
     while !cur.at_exit(full_exit) {
@@ -68,16 +71,23 @@ const fn lcm(a: usize, b: usize) -> usize {
 
 pub fn solve_part_1(file: &str) -> Option<u64> {
     let (instructions, node_map) = NodeIdent::create_node_map(file);
-    Some(dist_to_next_exit(&NodeIdent { ident: *b"AAA" }, &node_map, &instructions, true))
+    Some(dist_to_next_exit(
+        &NodeIdent { ident: *b"AAA" },
+        &node_map,
+        &instructions,
+        true,
+    ))
 }
 
 pub fn solve_part_2(file: &str) -> Option<u64> {
     let (instructions, node_map) = NodeIdent::create_node_map(file);
 
-    let current_nodes: Vec<NodeIdent> = node_map.keys().filter(|key| {
-        key.ident[2] == b'A'
-    }).map(|n| *n).collect();
-    
+    let current_nodes: Vec<NodeIdent> = node_map
+        .keys()
+        .filter(|key| key.ident[2] == b'A')
+        .map(|n| *n)
+        .collect();
+
     let lcm = current_nodes.iter().fold(1, |z, node| {
         let dist = dist_to_next_exit(node, &node_map, &instructions, false);
         lcm(z, dist as usize)
