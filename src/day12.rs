@@ -81,14 +81,18 @@ fn recur_all_permutations(
                 }
                 State::Unknown => {
                     let yes = if m > 0 {
-                        recur_all_permutations(
-                            n - 1,
-                            m - 1,
-                            run + 1,
-                            &states[1..],
-                            run_lens,
-                            hashmap,
-                        )
+                        if run < run_lens[0] {
+                            recur_all_permutations(
+                                n - 1,
+                                m - 1,
+                                run + 1,
+                                &states[1..],
+                                run_lens,
+                                hashmap,
+                            )
+                        } else {
+                            0
+                        }
                     } else {
                         0
                     };

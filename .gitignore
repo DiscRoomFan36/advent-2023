@@ -4,3 +4,6 @@
 
 # dont steal my inputs
 /data/inputs/*.txt
+
+# debug file for outputs
+a.txt
