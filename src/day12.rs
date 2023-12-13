@@ -3,9 +3,9 @@ use std::collections::HashMap;
 use once_cell::sync::Lazy;
 use regex::Regex;
 
-type IntType = usize;
+type IntType = u64;
 
-fn line_to_digits(line: &str) -> Vec<IntType> {
+fn line_to_digits(line: &str) -> Vec<u8> {
     const REGEX: &str = r"(-?\d+)";
     static RE: Lazy<Regex> = Lazy::new(|| Regex::new(REGEX).unwrap());
     RE.find_iter(line)
@@ -31,15 +31,15 @@ impl State {
 }
 
 fn recur_all_permutations(
-    n: usize,
-    m: usize,
-    run: usize,
+    n: u8,
+    m: u8,
+    run: u8,
     states: &[State],
-    run_lens: &[usize],
-    hashmap: &mut HashMap<(usize, usize, usize, usize), usize>,
+    run_lens: &[u8],
+    hashmap: &mut HashMap<[u8; 4], IntType>,
 ) -> IntType {
-    if hashmap.contains_key(&(n, m, run, run_lens.len())) {
-        hashmap[&(n, m, run, run_lens.len())]
+    if hashmap.contains_key(&[n, m, run, run_lens.len() as u8]) {
+        hashmap[&[n, m, run, run_lens.len() as u8]]
     } else {
         let answer = if states.len() == 0 {
             if run > 0 {
@@ -114,14 +114,14 @@ fn recur_all_permutations(
                 }
             }
         };
-        hashmap.insert((n, m, run, run_lens.len()), answer);
+        hashmap.insert([n, m, run, run_lens.len() as u8], answer);
         answer
     }
 }
 
 struct Record {
     states: Vec<State>,
-    numbers: Vec<IntType>,
+    numbers: Vec<u8>,
 }
 
 impl Record {
@@ -139,9 +139,9 @@ impl Record {
             .count()
     }
     fn number_of_arrangements(&self) -> IntType {
-        let n = self.num_unknown();
-        let m = self.numbers.iter().sum::<usize>()
-            - self.states.iter().filter(|x| **x == State::Damaged).count();
+        let n = self.num_unknown() as u8;
+        let m = self.numbers.iter().sum::<u8>()
+            - self.states.iter().filter(|x| **x == State::Damaged).count() as u8;
 
         recur_all_permutations(n, m, 0, &self.states, &self.numbers, &mut HashMap::new())
     }
