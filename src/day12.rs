@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use rayon::prelude::*;
+
 use once_cell::sync::Lazy;
 use regex::Regex;
 
@@ -153,34 +155,30 @@ impl Record {
 
 pub fn solve_part_1(file: &str) -> Option<IntType> {
     Some(
-        file.lines()
-            .map(|line| {
-                let record = Record::line_to_record(line);
-                Record::number_of_arrangements(&record)
-            })
+        file.par_lines()
+            .map(|line| Record::line_to_record(line))
+            .map(|record| Record::number_of_arrangements(&record))
             .sum(),
     )
 }
 
 pub fn solve_part_2(file: &str) -> Option<IntType> {
     Some(
-        file.lines()
-            .map(|line| {
-                let record = Record::line_to_record(line);
-                let record = Record {
-                    states: (0..4).fold(record.states.clone(), |z, _| {
-                        [z.clone(), vec![State::Unknown], record.states.clone()].concat()
-                    }),
-                    numbers: record
-                        .numbers
-                        .iter()
-                        .cycle()
-                        .take(5 * record.numbers.len())
-                        .map(|x| *x)
-                        .collect(),
-                };
-                Record::number_of_arrangements(&record)
+        file.par_lines()
+            .map(|line| Record::line_to_record(line))
+            .map(|record| Record {
+                states: (0..4).fold(record.states.clone(), |z, _| {
+                    [z.clone(), vec![State::Unknown], record.states.clone()].concat()
+                }),
+                numbers: record
+                    .numbers
+                    .iter()
+                    .cycle()
+                    .take(5 * record.numbers.len())
+                    .map(|x| *x)
+                    .collect(),
             })
+            .map(|record| Record::number_of_arrangements(&record))
             .sum(),
     )
 }

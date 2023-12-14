@@ -33,13 +33,10 @@ fn find_reflection_smudge<T: Eq>(grid: &mut Grid<T>, num_differences: IntType) -
     if let Some(rows) = reflection_rows_smudged(&grid, num_differences) {
         return rows as IntType * 100;
     }
-    // reflect to check cols
     grid.transpose();
-
     if let Some(cols) = reflection_rows_smudged(&grid, num_differences) {
         return cols as IntType;
     }
-
     panic!();
 }
 
@@ -63,10 +60,8 @@ fn get_grids(file: &str) -> Vec<Grid<bool>> {
 }
 
 pub fn solve_part_1(file: &str) -> Option<IntType> {
-    let mut grids = get_grids(file);
-
     Some(
-        grids
+        get_grids(file)
             .iter_mut()
             .map(|grid| find_reflection_smudge(grid, 0))
             .sum(),
@@ -74,10 +69,8 @@ pub fn solve_part_1(file: &str) -> Option<IntType> {
 }
 
 pub fn solve_part_2(file: &str) -> Option<IntType> {
-    let mut grids = get_grids(file);
-
     Some(
-        grids
+        get_grids(file)
             .iter_mut()
             .map(|grid| find_reflection_smudge(grid, 1))
             .sum(),
