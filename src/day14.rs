@@ -56,18 +56,64 @@ fn transpose<T>(v: Vec<Vec<T>>) -> Vec<Vec<T>> {
         })
         .collect()
 }
-fn rotate_right<T: Copy>(grid: Vec<Vec<T>>) -> Vec<Vec<T>> {
-    let mut new_grid = transpose(grid);
-    // reverse the cols
-    new_grid.reverse();
-    new_grid
-}
 
 fn tilt_west(grid: &mut Vec<Vec<RockType>>) {
     grid.par_iter_mut().for_each(|row| {
         row.split_mut(|rock| *rock == RockType::Cube)
             .for_each(|slice| slice.sort())
     })
+}
+fn tilt_east(grid: &mut Vec<Vec<RockType>>) {
+    grid.par_iter_mut().for_each(|row| row.reverse());
+    tilt_west(grid);
+    grid.par_iter_mut().for_each(|row| row.reverse());
+}
+fn tilt_north(grid: &mut Vec<Vec<RockType>>) {
+    (0..grid[0].len()).for_each(|i| {
+        let mut j = 0;
+        while j < grid.len() {
+            let mut r_count = 0;
+            let mut k = j;
+            while k < grid.len() {
+                match grid[k][i] {
+                    RockType::Cube => {
+                        break;
+                    }
+                    RockType::Rounded => {
+                        r_count += 1;
+                    }
+                    _ => {}
+                }
+                k += 1;
+            }
+            for k in j..grid.len() {
+                match grid[k][i] {
+                    RockType::Cube => break,
+                    _ => {
+                        grid[k][i] = if r_count > 0 {
+                            r_count -= 1;
+                            RockType::Rounded
+                        } else {
+                            RockType::None
+                        }
+                    }
+                }
+            }
+            j = k + 1;
+        }
+    })
+}
+fn tilt_south(grid: &mut Vec<Vec<RockType>>) {
+    grid.reverse();
+    tilt_north(grid);
+    grid.reverse();
+}
+
+fn cycle_grid_vec(grid: &mut Vec<Vec<RockType>>) {
+    tilt_west(grid);
+    tilt_north(grid);
+    tilt_east(grid);
+    tilt_south(grid);
 }
 
 fn count_west_load(grid: &[Vec<RockType>]) -> IntType {
@@ -80,15 +126,6 @@ fn count_west_load(grid: &[Vec<RockType>]) -> IntType {
                 .sum::<u32>()
         })
         .sum()
-}
-
-fn cycle_grid_vec(mut grid: Vec<Vec<RockType>>) -> Vec<Vec<RockType>> {
-    // (0..4).fold(grid, f)
-    for _ in 0..4 {
-        tilt_west(&mut grid);
-        grid = rotate_right(grid);
-    }
-    grid
 }
 
 pub fn solve_part_1(file: &str) -> Option<IntType> {
@@ -107,7 +144,8 @@ pub fn solve_part_2(file: &str) -> Option<IntType> {
 
     let mut i = 1;
     while i < CYCLES {
-        grid = cycle_grid_vec(grid);
+        // grid = cycle_grid_vec(grid);
+        cycle_grid_vec(&mut grid);
         if hashmap.contains_key(&grid) {
             break;
         }
@@ -121,7 +159,8 @@ pub fn solve_part_2(file: &str) -> Option<IntType> {
     let cycle_length = i - j;
     let extra_cycles = (CYCLES - j) % cycle_length;
     for _ in 0..extra_cycles {
-        grid = cycle_grid_vec(grid);
+        // grid = cycle_grid_vec(grid);
+        cycle_grid_vec(&mut grid);
     }
 
     Some(count_west_load(&grid))
@@ -129,7 +168,6 @@ pub fn solve_part_2(file: &str) -> Option<IntType> {
 
 const DAY: u8 = 14;
 
-#[allow(unused)]
 pub fn main(file: &str) {
     println!("Solving Day {}", DAY);
     println!("  part 1: {:?}", solve_part_1(&file));
