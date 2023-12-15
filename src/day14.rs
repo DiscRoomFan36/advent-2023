@@ -1,10 +1,10 @@
-use std::{fmt::Display, collections::HashMap, hash::{self, Hash}};
+use std::{collections::HashMap, fmt::Display, hash::Hash};
 
-use grid::Grid;
+use rayon::prelude::*;
 
 type IntType = u32;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 enum RockType {
     Rounded,
     Cube,
@@ -34,94 +34,67 @@ impl Display for RockType {
     }
 }
 
-fn file_to_grid(file: &str) -> Grid<RockType> {
+fn file_to_grid(file: &str) -> Vec<Vec<RockType>> {
     let grid: Vec<Vec<RockType>> = file
         .lines()
         .map(|line| line.chars().map(|char| RockType::new(char)).collect())
         .collect();
-    let mut grid = Grid::from_vec_with_order(
-        grid.iter().map(|x| x.clone()).flatten().collect(),
-        grid[0].len(),
-        grid::Order::ColumnMajor,
-    );
-    grid.transpose();
+    let grid = transpose(grid);
     grid
 }
 
-fn move_col_up(grid: &mut Grid<RockType>, col_index: usize) {
-
-    for i in 1..grid.rows() {
-        if grid[(i, col_index)] == RockType::Rounded {
-            // move up
-            let mut j = i;
-            while j > 0 {
-                j -= 1;
-                if grid[(j, col_index)] != RockType::None {
-                    j += 1;
-                    break;
-                }
-            }
-            grid[(i, col_index)] = RockType::None;
-            grid[(j, col_index)] = RockType::Rounded;
-        }
-    }
+fn transpose<T>(v: Vec<Vec<T>>) -> Vec<Vec<T>> {
+    assert!(!v.is_empty());
+    let len = v[0].len();
+    let mut iters: Vec<_> = v.into_iter().map(|n| n.into_iter()).collect();
+    (0..len)
+        .map(|_| {
+            iters
+                .iter_mut()
+                .map(|n| n.next().unwrap())
+                .collect::<Vec<T>>()
+        })
+        .collect()
+}
+fn rotate_right<T: Copy>(grid: Vec<Vec<T>>) -> Vec<Vec<T>> {
+    let mut new_grid = transpose(grid);
+    // reverse the cols
+    new_grid.reverse();
+    new_grid
 }
 
-use rayon::prelude::*;
-
-fn tilt_north(grid: &mut Grid<RockType>) {
-    // grid.iter_col_mut(col)
-    // (0..grid.cols()).into_par_iter().for_each(|col_index| {
-    //     move_col_up(grid, col_index)
-    // });
-
-    for col_index in 0..grid.cols() {
-
-        // grid.ite
-
-        for i in 1..grid.rows() {
-            if grid[(i, col_index)] == RockType::Rounded {
-                // move up
-                let mut j = i;
-                while j > 0 {
-                    j -= 1;
-                    if grid[(j, col_index)] != RockType::None {
-                        j += 1;
-                        break;
-                    }
-                }
-                grid[(i, col_index)] = RockType::None;
-                grid[(j, col_index)] = RockType::Rounded;
-            }
-        }
-
-        // move_col_up(grid, col_index);
-    }
+fn tilt_west(grid: &mut Vec<Vec<RockType>>) {
+    grid.par_iter_mut().for_each(|row| {
+        row.split_mut(|rock| *rock == RockType::Cube)
+            .for_each(|slice| slice.sort())
+    })
 }
 
-fn count_weight(grid: &Grid<RockType>) -> IntType {
-    let mut count = 0; 
-    for j in 0..grid.rows() {
-        for i in 0..grid.cols() {
-            if grid[(i, j)] == RockType::Rounded {
-                count += (grid.rows() - i) as IntType;
-            }
-        }
-    }
-    count
+fn count_west_load(grid: &[Vec<RockType>]) -> IntType {
+    grid.par_iter()
+        .map(|row| {
+            row.iter()
+                .enumerate()
+                .filter(|(_, rock)| **rock == RockType::Rounded)
+                .map(|(i, _)| (row.len() - i) as IntType)
+                .sum::<u32>()
+        })
+        .sum()
 }
 
-fn cycle(grid: &mut Grid<RockType>) {
+fn cycle_grid_vec(mut grid: Vec<Vec<RockType>>) -> Vec<Vec<RockType>> {
+    // (0..4).fold(grid, f)
     for _ in 0..4 {
-        tilt_north(grid);
-        grid.rotate_right();
+        tilt_west(&mut grid);
+        grid = rotate_right(grid);
     }
+    grid
 }
 
 pub fn solve_part_1(file: &str) -> Option<IntType> {
     let mut grid = file_to_grid(file);
-    tilt_north(&mut grid);
-    Some(count_weight(&grid))
+    tilt_west(&mut grid);
+    Some(count_west_load(&grid))
 }
 
 pub fn solve_part_2(file: &str) -> Option<IntType> {
@@ -129,30 +102,29 @@ pub fn solve_part_2(file: &str) -> Option<IntType> {
 
     let mut grid = file_to_grid(file);
 
-    // i wish grid had a hash
     let mut hashmap = HashMap::new();
-    hashmap.insert(grid.flatten().clone(), 0);
+    hashmap.insert(grid.clone(), 0);
 
     let mut i = 1;
     while i < CYCLES {
-        cycle(&mut grid);
-        if hashmap.contains_key(grid.flatten()) {
+        grid = cycle_grid_vec(grid);
+        if hashmap.contains_key(&grid) {
             break;
         }
-        hashmap.insert(grid.flatten().clone(), i);
+        hashmap.insert(grid.clone(), i);
         i += 1;
     }
 
-    let j = hashmap[grid.flatten()];
+    let j = hashmap[&grid];
 
     // cycle some amounts of time more
-    let cycle_length = i-j;
-    let extra_cycles =  (CYCLES - j) % cycle_length;
+    let cycle_length = i - j;
+    let extra_cycles = (CYCLES - j) % cycle_length;
     for _ in 0..extra_cycles {
-        cycle(&mut grid);
+        grid = cycle_grid_vec(grid);
     }
-    
-    Some(count_weight(&grid))
+
+    Some(count_west_load(&grid))
 }
 
 const DAY: u8 = 14;
