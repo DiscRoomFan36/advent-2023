@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::Display, hash::Hash};
+use std::{collections::HashMap, fmt::Display, hash::Hash, iter::zip};
 
 use rayon::prelude::*;
 
@@ -64,12 +64,18 @@ fn tilt_west(grid: &mut Vec<Vec<RockType>>) {
     })
 }
 fn tilt_east(grid: &mut Vec<Vec<RockType>>) {
-    grid.par_iter_mut().for_each(|row| row.reverse());
-    tilt_west(grid);
-    grid.par_iter_mut().for_each(|row| row.reverse());
+    grid.par_iter_mut().for_each(|row| {
+        row.split_mut(|rock| *rock == RockType::Cube)
+            .for_each(|slice| slice.sort_by(|a, b| b.cmp(a)))
+    })
 }
+
 fn tilt_north(grid: &mut Vec<Vec<RockType>>) {
+
     (0..grid[0].len()).for_each(|i| {
+        
+        // roll farwad and swap
+
         let mut j = 0;
         while j < grid.len() {
             let mut r_count = 0;
