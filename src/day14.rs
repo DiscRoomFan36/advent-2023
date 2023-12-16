@@ -1,6 +1,5 @@
-use std::{collections::HashMap, fmt::Display, hash::Hash};
-
 use rayon::prelude::*;
+use std::{collections::HashMap, fmt::Display, hash::Hash};
 
 type IntType = u32;
 
@@ -39,94 +38,93 @@ fn file_to_grid(file: &str) -> Vec<Vec<RockType>> {
         .lines()
         .map(|line| line.chars().map(|char| RockType::new(char)).collect())
         .collect();
-    let grid = transpose(grid);
     grid
 }
 
-fn transpose<T>(v: Vec<Vec<T>>) -> Vec<Vec<T>> {
-    assert!(!v.is_empty());
-    let len = v[0].len();
-    let mut iters: Vec<_> = v.into_iter().map(|n| n.into_iter()).collect();
-    (0..len)
-        .map(|_| {
-            iters
-                .iter_mut()
-                .map(|n| n.next().unwrap())
-                .collect::<Vec<T>>()
-        })
-        .collect()
+enum Tilt {
+    North,
+    West,
+    South,
+    East,
 }
 
-fn tilt_west(grid: &mut Vec<Vec<RockType>>) {
+fn tilt_w_e(grid: &mut Vec<Vec<RockType>>, w_or_e: bool) {
+    let (t, n_t) = if w_or_e {
+        (RockType::Rounded, RockType::None)
+    } else {
+        (RockType::None, RockType::Rounded)
+    };
     grid.par_iter_mut().for_each(|row| {
-        row.split_mut(|rock| *rock == RockType::Cube)
-            .for_each(|slice| slice.sort())
-    })
-}
-fn tilt_east(grid: &mut Vec<Vec<RockType>>) {
-    grid.par_iter_mut().for_each(|row| {
-        row.split_mut(|rock| *rock == RockType::Cube)
-            .for_each(|slice| slice.sort_by(|a, b| b.cmp(a)))
-    })
-}
-
-fn tilt_north(grid: &mut Vec<Vec<RockType>>) {
-    (0..grid[0].len()).for_each(|i| {
-        // roll farwad and swap
-
-        let mut j = 0;
-        while j < grid.len() {
-            let mut r_count = 0;
-            let mut k = j;
-            while k < grid.len() {
-                match grid[k][i] {
-                    RockType::Cube => {
-                        break;
-                    }
-                    RockType::Rounded => {
-                        r_count += 1;
-                    }
-                    _ => {}
+        let mut low = 0;
+        let mut high = 0;
+        while high < row.len() {
+            match row[high] {
+                RockType::Cube => {
+                    low = high + 1;
                 }
-                k += 1;
-            }
-            for k in j..grid.len() {
-                match grid[k][i] {
-                    RockType::Cube => break,
-                    _ => {
-                        grid[k][i] = if r_count > 0 {
-                            r_count -= 1;
-                            RockType::Rounded
-                        } else {
-                            RockType::None
-                        }
+                x if x == t => {
+                    if low != high {
+                        row[high] = n_t;
+                        row[low] = t;
                     }
+                    low += 1;
                 }
+                _ => {}
             }
-            j = k + 1;
+            high += 1;
         }
     })
 }
-fn tilt_south(grid: &mut Vec<Vec<RockType>>) {
-    grid.reverse();
-    tilt_north(grid);
-    grid.reverse();
+fn tilt_n_s(grid: &mut Vec<Vec<RockType>>, n_or_s: bool) {
+    let (t, n_t) = if n_or_s {
+        (RockType::Rounded, RockType::None)
+    } else {
+        (RockType::None, RockType::Rounded)
+    };
+    (0..grid[0].len()).for_each(|i| {
+        let mut low = 0;
+        let mut high = 0;
+        while high < grid.len() {
+            match grid[high][i] {
+                RockType::Cube => {
+                    low = high + 1;
+                }
+                x if x == t => {
+                    if low != high {
+                        grid[high][i] = n_t;
+                        grid[low][i] = t;
+                    }
+                    low += 1;
+                }
+                _ => {}
+            }
+            high += 1;
+        }
+    })
+}
+fn tilt(grid: &mut Vec<Vec<RockType>>, tilt: Tilt) {
+    match tilt {
+        Tilt::West => tilt_w_e(grid, true),
+        Tilt::North => tilt_n_s(grid, true),
+        Tilt::East => tilt_w_e(grid, false),
+        Tilt::South => tilt_n_s(grid, false),
+    }
 }
 
+const CYCLE: [Tilt; 4] = [Tilt::North, Tilt::West, Tilt::South, Tilt::East];
 fn cycle_grid_vec(grid: &mut Vec<Vec<RockType>>) {
-    tilt_west(grid);
-    tilt_north(grid);
-    tilt_east(grid);
-    tilt_south(grid);
+    for t in CYCLE {
+        tilt(grid, t)
+    }
 }
 
-fn count_west_load(grid: &[Vec<RockType>]) -> IntType {
+fn count_load(grid: &[Vec<RockType>]) -> IntType {
     grid.par_iter()
-        .map(|row| {
+        .enumerate()
+        .map(|(j, row)| {
             row.iter()
-                .enumerate()
-                .filter(|(_, rock)| **rock == RockType::Rounded)
-                .map(|(i, _)| (row.len() - i) as IntType)
+                .filter(|rock| **rock == RockType::Rounded)
+                .map(|_| (grid.len() - j) as IntType)
                 .sum::<u32>()
         })
         .sum()
@@ -134,21 +132,18 @@ fn count_west_load(grid: &[Vec<RockType>]) -> IntType {
 
 pub fn solve_part_1(file: &str) -> Option<IntType> {
     let mut grid = file_to_grid(file);
-    tilt_west(&mut grid);
-    Some(count_west_load(&grid))
+    tilt(&mut grid, Tilt::North);
+    Some(count_load(&grid))
 }
 
 pub fn solve_part_2(file: &str) -> Option<IntType> {
     const CYCLES: usize = 1_000_000_000;
-
     let mut grid = file_to_grid(file);
-
     let mut hashmap = HashMap::new();
     hashmap.insert(grid.clone(), 0);
 
     let mut i = 1;
     while i < CYCLES {
-        // grid = cycle_grid_vec(grid);
         cycle_grid_vec(&mut grid);
         if hashmap.contains_key(&grid) {
             break;
@@ -163,11 +158,10 @@ pub fn solve_part_2(file: &str) -> Option<IntType> {
     let cycle_length = i - j;
     let extra_cycles = (CYCLES - j) % cycle_length;
     for _ in 0..extra_cycles {
-        // grid = cycle_grid_vec(grid);
         cycle_grid_vec(&mut grid);
     }
 
-    Some(count_west_load(&grid))
+    Some(count_load(&grid))
 }
 
 const DAY: u8 = 14;
