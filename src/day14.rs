@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::Display, hash::Hash, iter::zip};
+use std::{collections::HashMap, fmt::Display, hash::Hash};
 
 use rayon::prelude::*;
 
@@ -71,9 +71,7 @@ fn tilt_east(grid: &mut Vec<Vec<RockType>>) {
 }
 
 fn tilt_north(grid: &mut Vec<Vec<RockType>>) {
-
     (0..grid[0].len()).for_each(|i| {
-        
         // roll farwad and swap
 
         let mut j = 0;
@@ -174,6 +172,7 @@ pub fn solve_part_2(file: &str) -> Option<IntType> {
 
 const DAY: u8 = 14;
 
+#[allow(unused)]
 pub fn main(file: &str) {
     println!("Solving Day {}", DAY);
     println!("  part 1: {:?}", solve_part_1(&file));

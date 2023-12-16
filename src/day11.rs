@@ -90,6 +90,8 @@ pub fn solve_part_2(file: &str) -> Option<IntType> {
 }
 
 const DAY: u8 = 11;
+
+#[allow(unused)]
 pub fn main(file: &str) {
     println!("Solving Day {}", DAY);
     println!("  part 1: {:?}", solve_part_1(&file));
