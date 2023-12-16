@@ -1,5 +1,5 @@
+use std::{collections::HashMap, hash::Hash};
 use rayon::prelude::*;
-use std::{collections::HashMap, fmt::Display, hash::Hash};
 
 type IntType = u32;
 
@@ -19,19 +19,6 @@ impl RockType {
         }
     }
 }
-impl Display for RockType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            match self {
-                RockType::Rounded => 'O',
-                RockType::Cube => '#',
-                RockType::None => '.',
-            }
-        )
-    }
-}
 
 fn file_to_grid(file: &str) -> Vec<Vec<RockType>> {
     let grid: Vec<Vec<RockType>> = file
@@ -48,12 +35,7 @@ enum Tilt {
     East,
 }
 
-fn tilt_w_e(grid: &mut Vec<Vec<RockType>>, w_or_e: bool) {
-    let (t, n_t) = if w_or_e {
-        (RockType::Rounded, RockType::None)
-    } else {
-        (RockType::None, RockType::Rounded)
-    };
+fn tilt_w_e(grid: &mut Vec<Vec<RockType>>, west: bool) {
     grid.par_iter_mut().for_each(|row| {
         let mut low = 0;
         let mut high = 0;
@@ -62,25 +44,27 @@ fn tilt_w_e(grid: &mut Vec<Vec<RockType>>, w_or_e: bool) {
                 RockType::Cube => {
                     low = high + 1;
                 }
-                x if x == t => {
+                RockType::Rounded if west => {
                     if low != high {
-                        row[high] = n_t;
-                        row[low] = t;
+                        row[low] = RockType::Rounded;
+                        row[high] = RockType::None;
                     }
                     low += 1;
-                }
+                },
+                RockType::None if !west => {
+                    if low != high {
+                        row[low] = RockType::None;
+                        row[high] = RockType::Rounded;
+                    }
+                    low += 1;
+                },
                 _ => {}
             }
             high += 1;
         }
     })
 }
-fn tilt_n_s(grid: &mut Vec<Vec<RockType>>, n_or_s: bool) {
-    let (t, n_t) = if n_or_s {
-        (RockType::Rounded, RockType::None)
-    } else {
-        (RockType::None, RockType::Rounded)
-    };
+fn tilt_n_s(grid: &mut Vec<Vec<RockType>>, north: bool) {
     (0..grid[0].len()).for_each(|i| {
         let mut low = 0;
         let mut high = 0;
@@ -89,13 +73,20 @@ fn tilt_n_s(grid: &mut Vec<Vec<RockType>>, n_or_s: bool) {
                 RockType::Cube => {
                     low = high + 1;
                 }
-                x if x == t => {
+                RockType::Rounded if north => {
                     if low != high {
-                        grid[high][i] = n_t;
-                        grid[low][i] = t;
+                        grid[low][i] = RockType::Rounded;
+                        grid[high][i] = RockType::None;
                     }
                     low += 1;
-                }
+                },
+                RockType::None if !north => {
+                    if low != high {
+                        grid[low][i] = RockType::None;
+                        grid[high][i] = RockType::Rounded;
+                    }
+                    low += 1;
+                },
                 _ => {}
             }
             high += 1;
