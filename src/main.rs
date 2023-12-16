@@ -36,5 +36,5 @@ fn main() {
     day13::main(&get_file(13, InputType::Input));
     day14::main(&get_file(14, InputType::Input));
     day15::main(&get_file(15, InputType::Input));
-    // day16::main(&get_file(16, InputType::Input));
+    day16::main(&get_file(16, InputType::Input));
 }

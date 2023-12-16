@@ -119,7 +119,7 @@ fn next_checks(
     grid[pos]
         .reflected_to(dir)
         .iter()
-        .map(|next_dir| next_position(grid, pos, *next_dir).and_then(|pos| Some((pos, *next_dir))))
+        .map(|&next_dir| next_position(grid, pos, next_dir).and_then(|pos| Some((pos, next_dir))))
         .filter_map(|x| x)
         .collect()
 }
@@ -127,23 +127,20 @@ fn next_checks(
 fn calculate_energized(mirrors: &Grid<MirrorType>, start: (Position, Direction)) -> IntType {
     let mut energy_grid: Grid<Vec<Direction>> = Grid::new(mirrors.rows(), mirrors.cols());
     let mut light_stack: Vec<(Position, Direction)> = vec![start];
-
     while let Some((pos, dir)) = light_stack.pop() {
-        if energy_grid[pos].contains(&dir) {
-            continue;
+        if !energy_grid[pos].contains(&dir) {
+            energy_grid[pos].push(dir);
+            light_stack.append(&mut next_checks(&mirrors, (pos, dir)))
         }
-        energy_grid[pos].push(dir);
-
-        light_stack.append(&mut next_checks(&mirrors, (pos, dir)))
     }
-    // count energized
     energy_grid.iter().filter(|dirs| !dirs.is_empty()).count() as IntType
 }
 
 pub fn solve_part_1(file: &str) -> Option<IntType> {
-    let mirrors = file_to_grid(file);
-
-    Some(calculate_energized(&mirrors, ((0, 0), Direction::Right)))
+    Some(calculate_energized(
+        &file_to_grid(file),
+        ((0, 0), Direction::Right),
+    ))
 }
 
 pub fn solve_part_2(file: &str) -> Option<IntType> {
@@ -172,6 +169,7 @@ pub fn solve_part_2(file: &str) -> Option<IntType> {
 
 const DAY: u8 = 16;
 
+#[allow(unused)]
 pub fn main(file: &str) {
     println!("Solving Day {}", DAY);
     println!("  part 1: {:?}", solve_part_1(&file));
