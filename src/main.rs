@@ -1,5 +1,6 @@
 use inputs::{get_file, InputType};
 mod inputs;
+mod helpers;
 
 mod day01;
 mod day02;

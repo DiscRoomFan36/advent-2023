@@ -1,12 +1,10 @@
-use grid::Grid;
 use rayon::prelude::*;
+
+use crate::helpers::constructor::{FromChar, file_to_grid, Grid};
+use crate::helpers::enums::Direction;
 
 type IntType = u32;
 type Position = (usize, usize);
-
-trait FromChar {
-    fn new(c: char) -> Self;
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum MirrorType {
@@ -17,7 +15,7 @@ enum MirrorType {
     SplitDash,
 }
 impl FromChar for MirrorType {
-    fn new(char: char) -> Self {
+    fn from_char(char: char) -> Self {
         match char {
             '.' => MirrorType::None,
             '/' => MirrorType::ReflectForward,
@@ -62,21 +60,6 @@ impl MirrorType {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum Direction {
-    Up,
-    Down,
-    Left,
-    Right,
-}
-
-fn file_to_grid<T: FromChar + Clone>(file: &str) -> Grid<T> {
-    let grid: Vec<Vec<T>> = file
-        .lines()
-        .map(|line| line.chars().map(|char| T::new(char)).collect())
-        .collect();
-    Grid::from_vec(grid.concat(), grid[0].len())
-}
 
 // moves the beam forward, return None if off the edge
 fn next_position(grid: &Grid<MirrorType>, (j, i): Position, dir: Direction) -> Option<Position> {
