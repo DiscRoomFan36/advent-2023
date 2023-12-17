@@ -1,7 +1,7 @@
 use rayon::prelude::*;
 
-use crate::helpers::constructor::{FromChar, file_to_grid, Grid};
-use crate::helpers::enums::Direction;
+use crate::helpers::constructor::{file_to_grid, FromChar, Grid};
+use crate::helpers::enums_and_types::Direction;
 
 type IntType = u32;
 type Position = (usize, usize);
@@ -60,9 +60,8 @@ impl MirrorType {
     }
 }
 
-
 // moves the beam forward, return None if off the edge
-fn next_position(grid: &Grid<MirrorType>, (j, i): Position, dir: Direction) -> Option<Position> {
+fn next_position<T>(grid: &Grid<T>, (j, i): Position, dir: Direction) -> Option<Position> {
     match dir {
         Direction::Up => {
             if j > 0 {

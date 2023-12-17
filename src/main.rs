@@ -1,6 +1,6 @@
 use inputs::{get_file, InputType};
-mod inputs;
 mod helpers;
+mod inputs;
 
 mod day01;
 mod day02;
@@ -18,6 +18,7 @@ mod day13;
 mod day14;
 mod day15;
 mod day16;
+mod day17;
 
 fn main() {
     println!("Hello Advent");
@@ -38,4 +39,5 @@ fn main() {
     day14::main(&get_file(14, InputType::Input));
     day15::main(&get_file(15, InputType::Input));
     day16::main(&get_file(16, InputType::Input));
+    day17::main(&get_file(17, InputType::Input));
 }

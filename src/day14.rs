@@ -1,5 +1,5 @@
-use std::{collections::HashMap, hash::Hash};
 use rayon::prelude::*;
+use std::{collections::HashMap, hash::Hash};
 
 type IntType = u32;
 
@@ -50,14 +50,14 @@ fn tilt_w_e(grid: &mut Vec<Vec<RockType>>, west: bool) {
                         row[high] = RockType::None;
                     }
                     low += 1;
-                },
+                }
                 RockType::None if !west => {
                     if low != high {
                         row[low] = RockType::None;
                         row[high] = RockType::Rounded;
                     }
                     low += 1;
-                },
+                }
                 _ => {}
             }
             high += 1;
@@ -79,14 +79,14 @@ fn tilt_n_s(grid: &mut Vec<Vec<RockType>>, north: bool) {
                         grid[high][i] = RockType::None;
                     }
                     low += 1;
-                },
+                }
                 RockType::None if !north => {
                     if low != high {
                         grid[low][i] = RockType::None;
                         grid[high][i] = RockType::Rounded;
                     }
                     low += 1;
-                },
+                }
                 _ => {}
             }
             high += 1;
