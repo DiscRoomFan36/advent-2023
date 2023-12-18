@@ -55,6 +55,23 @@ fn next_directions(
     }
 }
 
+fn heading_oob((dir, count): DirAndCount, (j, i): Position, (min, max): (u8, u8), (rows, cols): (usize, usize)) -> bool {
+    match dir {
+        Direction::Up => {
+            j as u8 + count <= min
+        },
+        Direction::Left => {
+            i as u8 + count <= min
+        },
+        Direction::Down => {
+            j as u8 + count >= rows as u8 + max
+        },
+        Direction::Right => {
+            i as u8 + count >= cols as u8 + max
+        },
+    }
+}
+
 fn next_position<T>(grid: &Grid<T>, (j, i): Position, dir: Direction) -> Option<Position> {
     match dir {
         Direction::Up => {
@@ -92,11 +109,15 @@ fn next_checks(loss_grid: &Grid<u8>, min_and_max: (u8, u8), check: NodeState) ->
         .iter()
         .map(|&next_dir| {
             next_position(loss_grid, check.position, next_dir.0).and_then(|pos| {
-                Some(NodeState {
-                    position: pos,
-                    dir_and_count: next_dir,
-                    heat_level: check.heat_level + loss_grid[pos] as IntType,
-                })
+                if !heading_oob(next_dir, pos, min_and_max, loss_grid.size()) {
+                    Some(NodeState {
+                        position: pos,
+                        dir_and_count: next_dir,
+                        heat_level: check.heat_level + loss_grid[pos] as IntType,
+                    })
+                } else {
+                    None
+                }
             })
         })
         .filter_map(|x| x)
