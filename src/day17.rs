@@ -55,20 +55,17 @@ fn next_directions(
     }
 }
 
-fn heading_oob((dir, count): DirAndCount, (j, i): Position, (min, max): (u8, u8), (rows, cols): (usize, usize)) -> bool {
+fn heading_oob(
+    (dir, count): DirAndCount,
+    (j, i): Position,
+    (min, max): (u8, u8),
+    (rows, cols): (usize, usize),
+) -> bool {
     match dir {
-        Direction::Up => {
-            j as u8 + count <= min
-        },
-        Direction::Left => {
-            i as u8 + count <= min
-        },
-        Direction::Down => {
-            j as u8 + count >= rows as u8 + max
-        },
-        Direction::Right => {
-            i as u8 + count >= cols as u8 + max
-        },
+        Direction::Up => j as u8 + count <= min,
+        Direction::Left => i as u8 + count <= min,
+        Direction::Down => j as u8 + count >= rows as u8 + max,
+        Direction::Right => i as u8 + count >= cols as u8 + max,
     }
 }
 
