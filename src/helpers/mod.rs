@@ -226,3 +226,26 @@ pub mod color {
         }
     }
 }
+
+pub mod math {
+    pub fn gcd<T>(mut a: T, mut b: T) -> T
+    where
+        T: std::ops::Rem<Output = T> + Default + std::cmp::PartialEq + Copy,
+    {
+        while b != T::default() {
+            (a, b) = (b, a % b);
+        }
+        a
+    }
+    pub fn lcm<T>(a: T, b: T) -> T
+    where
+        T: std::ops::Rem<Output = T>
+            + std::ops::Div<Output = T>
+            + std::ops::Mul<Output = T>
+            + Default
+            + std::cmp::PartialEq
+            + Copy,
+    {
+        a / gcd(a, b) * b
+    }
+}

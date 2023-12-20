@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use crate::helpers::math::lcm;
+
 #[derive(PartialEq, Eq, Clone, Copy, Debug, Hash)]
 struct NodeIdent {
     ident: [u8; 3],
@@ -56,17 +58,6 @@ fn dist_to_next_exit(
         count += 1;
     }
     count as u64
-}
-
-// took from some guy on the AOC reddit, also the rust overflow checker didn't trigger for some reason, had to use u64
-const fn gcd(mut a: usize, mut b: usize) -> usize {
-    while b != 0 {
-        (a, b) = (b, a % b);
-    }
-    a
-}
-const fn lcm(a: usize, b: usize) -> usize {
-    a / gcd(a, b) * b
 }
 
 pub fn solve_part_1(file: &str) -> Option<u64> {
