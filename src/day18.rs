@@ -4,10 +4,12 @@ use crate::helpers::{
 use once_cell::sync::Lazy;
 use regex::Regex;
 
+type IntType = i64;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 struct DigStep {
     dir: Direction,
-    count: usize,
+    count: IntType,
 }
 impl DigStep {
     fn line_to_step(line: &str, correct: bool) -> Self {
@@ -35,7 +37,7 @@ impl DigStep {
                     "3" => Direction::Up,
                     _ => panic!(),
                 },
-                count: hex_to_bin(count_true),
+                count: hex_to_bin(count_true) as IntType,
             },
         }
     }
@@ -46,24 +48,20 @@ impl DigStep {
     }
 }
 
-type IntType = i64;
-
 fn get_interior_volume(steps: Vec<DigStep>) -> IntType {
     // use polygon area formula, inputs to big
-    let mut area: i64 = 0;
-    let mut line: i64 = 0;
-    let (mut row, mut col): (i64, i64) = (0, 0);
-    for i in 0..steps.len() {
-        let item = steps[i];
-        let (next_row, next_col) = next_position_counted((row, col), item.dir, item.count as i64);
+    let mut area = 0;
+    let mut line = 0;
+    steps.iter().fold((0, 0), |(row, col), item| {
+        let (next_row, next_col) = next_position_counted((row, col), item.dir, item.count);
 
         area += (col * next_row) - (row * next_col);
-        line += item.count as i64;
+        line += item.count;
 
-        (row, col) = (next_row, next_col);
-    }
+        (next_row, next_col)
+    });
 
-    (area / 2 + line / 2 + 1) as IntType
+    area / 2 + line / 2 + 1
 }
 
 pub fn solve_part_1(file: &str) -> Option<IntType> {
