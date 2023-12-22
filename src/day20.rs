@@ -297,11 +297,4 @@ mod tests {
         let content = inputs::get_file_part(DAY, InputType::Sample, 2);
         assert_eq!(solve_part_1(&content), Some(11687500));
     }
-
-    #[test]
-    fn solves_second_problem() {
-        // probably shouldn't do this with my input
-        let content = inputs::get_file(DAY, InputType::Input);
-        assert_eq!(solve_part_2(&content), Some(262775362119547))
-    }
 }
