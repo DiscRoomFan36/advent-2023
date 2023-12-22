@@ -31,6 +31,19 @@ pub mod constructor {
 }
 
 #[allow(unused)]
+pub mod array_helpers {
+
+    pub fn contains_only<T: PartialEq>(array: &[T], only: &[T]) -> bool {
+        for item in array {
+            if !only.contains(item) {
+                return false;
+            }
+        }
+        true
+    }
+}
+
+#[allow(unused)]
 pub mod grid_stuff {
     use super::enums_and_types::Position;
     use grid::Grid;
@@ -223,6 +236,37 @@ pub mod print_helpers {
             match self {
                 true => '#',
                 false => '.',
+            }
+        }
+    }
+
+    impl ToChar for usize {
+        fn to_char(&self) -> char {
+            match self {
+                0 => '0',
+                1 => '1',
+                2 => '2',
+                3 => '3',
+                4 => '4',
+                5 => '5',
+                6 => '6',
+                7 => '7',
+                8 => '8',
+                9 => '9',
+                _ => '#',
+            }
+        }
+    }
+
+    impl<T> ToChar for Option<T>
+    where
+        T: ToChar,
+    {
+        fn to_char(&self) -> char {
+            if let Some(x) = self {
+                x.to_char()
+            } else {
+                '.'
             }
         }
     }
