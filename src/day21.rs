@@ -1,4 +1,4 @@
-type IntType = u32;
+type IntType = u64;
 
 use grid::Grid;
 
@@ -8,10 +8,11 @@ use crate::helpers::{
     print_helpers::ToChar,
 };
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 enum GardenType {
-    Rock,
+    #[default]
     Garden,
+    Rock,
     Start,
 }
 impl FromChar for GardenType {
@@ -78,8 +79,71 @@ pub fn solve_part_1(file: &str) -> Option<IntType> {
     Some(spread_out_and_count(&garden, 64))
 }
 
-pub fn solve_part_2(_file: &str) -> Option<IntType> {
-    None
+fn tile_grid<T: Copy + Default>(base_grid: &Grid<T>, rows: usize, cols: usize) -> Grid<T> {
+    let mut bigger_grid = Grid::new(base_grid.rows() * rows, base_grid.cols() * cols);
+    for j in 0..bigger_grid.rows() {
+        for i in 0..bigger_grid.cols() {
+            bigger_grid[(j, i)] = base_grid[(j % base_grid.rows(), i % base_grid.cols())];
+        }
+    }
+    bigger_grid
+}
+
+fn count_true(grid: &Grid<bool>) -> usize {
+    grid.iter().filter(|&&x| x).count()
+}
+
+pub fn solve_part_2(file: &str) -> Option<IntType> {
+    let mut garden: Grid<GardenType> = file_to_grid(file);
+
+    let start_pos = find_index_of(&garden, |&x| x == GardenType::Start);
+
+    garden[start_pos] = GardenType::Garden;
+
+    let bigger_grid = tile_grid(&garden, 5, 5);
+
+    let mut step_grid = Grid::new(bigger_grid.rows(), bigger_grid.cols());
+    let start_pos = (start_pos.0 + (131 * 2), start_pos.1 + (131 * 2));
+    step_grid[start_pos] = true;
+
+    const TOTAL_STEPS: usize = 26501365;
+
+    assert_eq!(garden.rows(), garden.cols());
+
+    let size = garden.rows();
+
+    let starting_steps = TOTAL_STEPS % size;
+
+    dbg!(starting_steps);
+
+    for _ in 0..starting_steps {
+        step_grid = spread_out(&bigger_grid, step_grid);
+    }
+    let r1 = count_true(&step_grid);
+
+    for _ in 0..size {
+        step_grid = spread_out(&bigger_grid, step_grid);
+    }
+    let r2 = count_true(&step_grid);
+
+    for _ in 0..size {
+        step_grid = spread_out(&bigger_grid, step_grid);
+    }
+    let r3 = count_true(&step_grid);
+
+    // some math i got from the reddit
+    // thanks @aexi
+    let a = (r3 - (2 * r2) + r1) / 2;
+    let b = (4 * r2 - 3 * r1 - r3) / 2;
+    let c = r1 / 1;
+
+    let x = TOTAL_STEPS / size;
+
+    let ans = (a * x.pow(2)) + (b * x) + c;
+
+    dbg!(ans);
+
+    Some(ans as IntType)
 }
 
 const DAY: u8 = 21;
