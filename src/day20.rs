@@ -1,14 +1,14 @@
-use std::collections::{HashMap, VecDeque};
 use itertools::Itertools;
 use once_cell::sync::Lazy;
-use regex::Regex;
 use rayon::prelude::*;
+use regex::Regex;
+use std::collections::{HashMap, VecDeque};
 
 use crate::helpers::math::lcm;
 
 type IntType = u64;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum ModuleType {
     FlipFlop,
     Conjunction,
@@ -251,6 +251,8 @@ pub fn solve_part_2(file: &str) -> Option<IntType> {
         .iter()
         .find(|(_, v)| v.destinations.contains(&String::from("rx")))
         .unwrap();
+
+    assert_eq!(caller_module.module_type, ModuleType::Conjunction);
 
     // if all are high, then we win
     let key_modules = caller_module

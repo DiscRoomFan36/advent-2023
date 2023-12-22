@@ -56,6 +56,73 @@ pub mod grid_stuff {
             }
         }
     }
+
+    use std::collections::VecDeque;
+
+    pub fn flood_fill_count<F>(
+        size: (usize, usize),
+        pos: (usize, usize),
+        count: usize,
+        f: F,
+    ) -> Grid<usize>
+    where
+        F: Fn((usize, usize)) -> bool,
+    {
+        let (rows, cols) = size;
+        let mut flooding_grid = Grid::new(rows, cols);
+        let mut flood_stack = VecDeque::new();
+        flood_stack.push_back((pos, count));
+
+        while let Some(((y, x), c)) = flood_stack.pop_front() {
+            flooding_grid[(y, x)] = c;
+
+            if x > 0 && (flooding_grid[(y, x - 1)] < c - 1 && f((y, x - 1))) {
+                flood_stack.push_back(((y, x - 1), c - 1));
+            }
+            if x < cols - 1 && (flooding_grid[(y, x + 1)] < c - 1 && f((y, x + 1))) {
+                flood_stack.push_back(((y, x + 1), c - 1));
+            }
+
+            if y > 0 && (flooding_grid[(y - 1, x)] < c - 1 && f((y - 1, x))) {
+                flood_stack.push_back(((y - 1, x), c - 1));
+            }
+            if y < rows - 1 && (flooding_grid[(y + 1, x)] < c - 1 && f((y + 1, x))) {
+                flood_stack.push_back(((y + 1, x), c - 1));
+            }
+        }
+
+        flooding_grid
+    }
+
+    fn grid_to_bool_grid<T, F>(grid: Grid<T>, f: F) -> Grid<bool>
+    where
+        F: Fn(&T) -> bool,
+    {
+        let (rows, cols) = grid.size();
+        let mut new_grid = Grid::new(rows, cols);
+
+        for j in 0..rows {
+            for i in 0..cols {
+                new_grid[(j, i)] = f(&grid[(j, i)]);
+            }
+        }
+
+        new_grid
+    }
+
+    pub fn find_index_of<T, F>(grid: &Grid<T>, f: F) -> (usize, usize)
+    where
+        F: Fn(&T) -> bool,
+    {
+        for j in 0..grid.rows() {
+            for i in 0..grid.cols() {
+                if f(&grid[(j, i)]) == true {
+                    return (j, i);
+                }
+            }
+        }
+        panic!()
+    }
 }
 
 #[allow(unused)]
