@@ -147,6 +147,22 @@ pub mod enums_and_types {
         Left,
         Right,
     }
+    pub const DIRECTIONS: [Direction; 4] = [
+        Direction::Up,
+        Direction::Down,
+        Direction::Left,
+        Direction::Right,
+    ];
+    impl Direction {
+        pub fn opposite(&self) -> Self {
+            match self {
+                Direction::Up => Direction::Down,
+                Direction::Down => Direction::Up,
+                Direction::Left => Direction::Right,
+                Direction::Right => Direction::Left,
+            }
+        }
+    }
 
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
     pub enum CompassDirection {
