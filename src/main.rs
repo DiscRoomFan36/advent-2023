@@ -25,6 +25,7 @@ mod day20;
 mod day21;
 mod day22;
 mod day23;
+mod day24;
 
 fn main() {
     println!("Hello Advent");
@@ -51,5 +52,6 @@ fn main() {
     // day20::main(&get_file(20, InputType::Input));
     // day21::main(&get_file(21, InputType::Input));
     // day22::main(&get_file(22, InputType::Input));
-    day23::main(&get_file(23, InputType::Input));
+    // day23::main(&get_file(23, InputType::Input));
+    day24::main(&get_file(24, InputType::Input));
 }

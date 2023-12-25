@@ -21,7 +21,7 @@ pub mod constructor {
 
     use once_cell::sync::Lazy;
     use regex::Regex;
-    fn line_to_digits<T: FromStr + Default>(line: &str) -> Vec<T> {
+    pub fn line_to_digits<T: FromStr + Default>(line: &str) -> Vec<T> {
         const REGEX: &str = r"(-?\d+)";
         static RE: Lazy<Regex> = Lazy::new(|| Regex::new(REGEX).unwrap());
         RE.find_iter(line)
