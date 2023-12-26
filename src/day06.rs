@@ -54,14 +54,14 @@ fn how_many_ways(time: IntType, dist: IntType) -> IntType {
     largest - smallest + 1
 }
 
-pub fn solve_part_1(file: &String) -> Option<IntType> {
+pub fn solve_part_1(file: &str) -> Option<IntType> {
     let inputs: Vec<Vec<IntType>> = file.lines().map(|line| line_to_digits(line)).collect();
     let (times, distances) = (inputs[0].clone(), inputs[1].clone());
 
     Some(zip(times, distances).fold(1, |z, (time, dist)| z * how_many_ways(time, dist)))
 }
 
-pub fn solve_part_2(file: &String) -> Option<IntType> {
+pub fn solve_part_2(file: &str) -> Option<IntType> {
     let inputs: Vec<IntType> = file
         .lines()
         .map(|line| {

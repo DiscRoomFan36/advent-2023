@@ -83,7 +83,6 @@ fn spread_out_and_count(garden: &Grid<GardenType>, steps: usize) -> IntType {
     let scale = 100;
     if steps < scale * size {
         let scale = ((steps / size) + 1) * 2 + 1;
-        dbg!(scale);
         let bigger_grid = tile_grid(&garden, scale, scale);
 
         let start_pos = (
