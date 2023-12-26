@@ -4,6 +4,8 @@ use grid::Grid;
 use itertools::Itertools;
 
 use crate::helpers::constructor::{file_to_grid, FromChar};
+use crate::helpers::enums_and_types::{Direction, Position, DIRECTIONS};
+use crate::helpers::positions_and_directions::next_position;
 
 type IntType = usize;
 
@@ -29,9 +31,6 @@ impl FromChar for HikingTrailType {
         }
     }
 }
-
-use crate::helpers::enums_and_types::{Direction, Position, DIRECTIONS};
-use crate::helpers::positions_and_directions::next_position;
 
 fn trail_to_graph(
     trail: &Grid<HikingTrailType>,
@@ -120,6 +119,7 @@ fn longest_trail_graph(trail: &Grid<HikingTrailType>, blocking_slopes: bool) -> 
 
     // keep track of every junction
     let junction_list = vec![start_pos];
+
     let (dist, next_pos) = graph[&start_pos][0];
     let mut stack = vec![(next_pos, dist, junction_list)];
     let mut longest_trail = 0;
