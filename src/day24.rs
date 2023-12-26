@@ -1,22 +1,26 @@
+use std::fmt::Debug;
+use std::str::FromStr;
+use z3::ast::{Ast, Int};
+use z3::*;
+
 use crate::helpers::constructor::line_to_digits;
 
 type IntType = i64;
-
 type HailType = f64;
 
 #[derive(Debug, Clone, Copy)]
-struct Hail {
-    px: HailType,
-    py: HailType,
-    pz: HailType,
-    vx: HailType,
-    vy: HailType,
-    vz: HailType,
+struct Hail<T: Copy + Clone + Debug + PartialEq> {
+    px: T,
+    py: T,
+    pz: T,
+    vx: T,
+    vy: T,
+    vz: T,
 }
 
 const ZERO: HailType = 0.0;
 
-impl Hail {
+impl Hail<HailType> {
     fn to_pos(&self) -> (HailType, HailType, HailType) {
         (self.px, self.py, self.pz)
     }
@@ -67,7 +71,7 @@ impl Hail {
     }
 }
 
-fn parse(file: &str) -> Vec<Hail> {
+fn parse<T: Copy + Clone + Debug + PartialEq + FromStr + Default>(file: &str) -> Vec<Hail<T>> {
     file.lines()
         .map(|line| {
             let p = line_to_digits(line);
@@ -84,7 +88,11 @@ fn parse(file: &str) -> Vec<Hail> {
         .collect()
 }
 
-fn count_intersections_2d(hail_stones: &Vec<Hail>, min: HailType, max: HailType) -> IntType {
+fn count_intersections_2d(
+    hail_stones: &Vec<Hail<HailType>>,
+    min: HailType,
+    max: HailType,
+) -> IntType {
     let mut intersections = 0;
     for i in 0..hail_stones.len() {
         for j in i + 1..hail_stones.len() {
@@ -107,8 +115,41 @@ pub fn solve_part_1(file: &str) -> Option<IntType> {
     Some(count_intersections_2d(&hail_stones, MIN, MAX))
 }
 
-pub fn solve_part_2(_file: &str) -> Option<IntType> {
-    None
+pub fn solve_part_2(file: &str) -> Option<IntType> {
+    let hail_stones = parse(file);
+
+    let cfg = Config::new();
+    let ctx = Context::new(&cfg);
+    let solver = Solver::new(&ctx);
+
+    let px = Int::new_const(&ctx, "px");
+    let py = Int::new_const(&ctx, "py");
+    let pz = Int::new_const(&ctx, "pz");
+    let vx = Int::new_const(&ctx, "vx");
+    let vy = Int::new_const(&ctx, "vy");
+    let vz = Int::new_const(&ctx, "vz");
+
+    for hail in hail_stones {
+        let pxn = Int::from_i64(&ctx, hail.px);
+        let pyn = Int::from_i64(&ctx, hail.py);
+        let pzn = Int::from_i64(&ctx, hail.pz);
+        let vxn = Int::from_i64(&ctx, hail.vx);
+        let vyn = Int::from_i64(&ctx, hail.vy);
+        let vzn = Int::from_i64(&ctx, hail.vz);
+        let tn = Int::fresh_const(&ctx, "t");
+
+        solver.assert(&(&pxn + &vxn * &tn)._eq(&(&px + &vx * &tn)));
+        solver.assert(&(&pyn + &vyn * &tn)._eq(&(&py + &vy * &tn)));
+        solver.assert(&(&pzn + &vzn * &tn)._eq(&(&pz + &vz * &tn)));
+    }
+
+    solver.check();
+    let model = solver.get_model().unwrap();
+    let x = model.get_const_interp(&px).unwrap().as_i64().unwrap();
+    let y = model.get_const_interp(&py).unwrap().as_i64().unwrap();
+    let z = model.get_const_interp(&pz).unwrap().as_i64().unwrap();
+
+    Some(x + y + z)
 }
 
 const DAY: u8 = 24;
@@ -133,7 +174,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "not done, need to use z3"]
     fn solves_second_problem() {
         let content = inputs::get_file(DAY, InputType::Sample);
         assert_eq!(solve_part_2(&content), Some(47))
