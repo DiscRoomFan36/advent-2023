@@ -92,8 +92,11 @@ fn time<T, F: Fn(&str) -> Option<T>>(day: u8, part: u8, f: F)
 where
     T: Display + Default,
 {
+    // remove read from disk time
+    let input = get_file(day, InputType::Input);
+
     let start = Instant::now();
-    let result = f(&get_file(day, InputType::Input));
+    let result = f(&input);
     let end = Instant::now();
 
     let result = result.unwrap_or_default();
